@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Project;
-use App\Models\ProjectUser;
+use App\Models\ProjectUsers;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -21,13 +21,12 @@ class Projects extends Controller
     public function index()
     {
         $user = Auth::user();
-        $projects = Project::where('creator', $user->id)->get();
         if ($user->role == "Manager") {
-            var_dump($projects);
+            $projects = Project::where('creator', $user->id)->get();
             return Inertia::render('Manager/Projects', ['projects' => $projects]);
         }
-        $projects = ProjectUser::where("user_id", $user->id);
-        return Inertia::render('Projects', ['projects' => $projects]);
+        $projects = ProjectUsers::with('project')->where("user_id", $user->id)->get(['role', 'user_id', 'project_id']);
+        return Inertia::render('Projects', ['projects' => count($projects) ? $projects : []]);
     }
 
     /**
@@ -67,7 +66,7 @@ class Projects extends Controller
             'status' => $request->post('status'),
             'description' => $request->post('description'),
         ]);
-        return redirect()->route('projects.show', ['project' => $project->id]);
+        return redirect()->route('projects.show', ['project' => $project->id, 'success' => true, 'message' => 'Project Successfully Created']);
     }
 
     /**
@@ -78,14 +77,25 @@ class Projects extends Controller
      */
     public function show($id)
     {
-        //
-        echo 'hw';
-        // $project = Project::with(['users', 'tasks'])->where('id', $id)->get();
-        // if ($project->creator != Auth::user()->id) {
-        //     return redirect('/projects/');
-        // }
+        //Todo::check if Manager
+        $user = Auth::user();
+        $projectUser = ProjectUsers::where('user_id', $user->id)->where('project_id', $id)->first();
 
-        // return Inertia::render('Manager/ViewProject', ['project' => $project]);
+        if ($projectUser) {
+            //user is in the project
+
+        }
+
+        $project = Project::with(['users', 'tasks'])->where('id', $id)->first();
+        if (!$project) {
+            abort(404);
+        }
+
+        if ($project->creator == $user->id) {
+            return Inertia::render('Manager/ViewProject', ['project' => $project]);
+        }
+
+        return redirect('/projects/');
     }
 
     /**

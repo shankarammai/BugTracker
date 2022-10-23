@@ -1,8 +1,13 @@
 import React from 'react'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link } from '@inertiajs/inertia-react';
+import alertify from 'alertifyjs';
+import 'alertifyjs/build/css/alertify.css';
 
 export default function Projects(props) {
+    if (props.success) {
+        (props.success) ? alertify.success(props.message) : alertify.error(props.message)
+    }
     return (
         <AuthenticatedLayout
             auth={props.auth}
@@ -10,59 +15,37 @@ export default function Projects(props) {
             header={<h2 classNameNameName="font-semibold text-xl text-gray-800 leading-tight">Projects</h2>}
         >
             <Head title="Projects" />
-
-            <section>
-
-                <Link href='/projects/create' className="top-2 left-1  text-white bg-purple-700 hover:bg-purple-800 focus:outline-none focus:ring-4 focus:ring-purple-300 font-medium rounded-full text-sm px-5 py-2.5 text-center mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">Create New Project</Link>
-
-                <div className="overflow-x-auto relative shadow-md sm:rounded-lg top-2">
-                    <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                        <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                            <tr>
-                                <th scope="col" className="py-3 px-6">
-                                    Title
-                                </th>
-                                <th scope="col" className="py-3 px-6">
-                                    Status
-                                </th>
-                                <th scope="col" className="py-3 px-6">
-                                    Due Date
-                                </th>
-                                <th scope="col" className="py-3 px-6">
-                                    Budget
-                                </th>
-                                <th scope="col" className="py-3 px-6">
-                                    <span className="sr-only">Edit</span>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {props.projects.map((project, index) => {
-                                return (<tr className="bg-gray-300 border-b dark:bg-gray-800 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600">
-                                    <th scope="row" className="py-4 px-6 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                        {project.title}
-                                    </th>
-                                    <td className="py-4 px-6">
-                                        {project.status}
-                                    </td>
-                                    <td className="py-4 px-6">
-                                        {project.due_date}
-                                    </td>
-                                    <td className="py-4 px-6">
-                                        {project.budget}
-                                    </td>
-                                    <td className="py-4 px-6 text-right">
-                                        <a href="#" className="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
-                                    </td>
-                                </tr>);
-                            })}
-
-                        </tbody>
-                    </table>
+            <section class="text-gray-600 body-font bg-white">
+                <div class="container px-5 mx-auto">
+                    <div class="flex flex-wrap w-full mb-1 flex-col items-start text-center">
+                        <Link href='/projects/create' className=" my-1 top-2 left-1  text-white bg-purple-700 hover:bg-purple-800 focus:outline-none focus:ring-4 focus:ring-purple-300 font-medium rounded-full text-sm px-5 py-2.5 text-center mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900">Create New Project</Link>
+                    </div>
+                    <div class="flex flex-wrap -m-4">
+                        {props.projects.map((project) => {
+                            return <>
+                                <div class="xl:w-1/3 md:w-1/2 p-4">
+                                    <div class="border border-gray-200 p-6 rounded-lg">
+                                        <div class="mb-2">
+                                            <p class="text-sm text-gray-600 flex items-center">{project.status}</p>
+                                            <div class="text-gray-900 font-bold text-xl mb-2">{project.title}</div>
+                                        </div>
+                                        <div class="flex items-center">
+                                            <div class="text-sm">
+                                                <p class="text-gray-900 leading-none">Budget {project.budget}</p>
+                                                <p class="text-gray-600 mb-2"> Due Date {project.due_date}</p>
+                                                <Link href={'/projects/' + project.id} class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">
+                                                    Read more
+                                                </Link>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </>
+                        })
+                        }
+                    </div>
                 </div>
             </section>
-
-
         </AuthenticatedLayout>
     )
 }

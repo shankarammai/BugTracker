@@ -11,9 +11,9 @@ export default function Authenticated({ auth, header, children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
 
     return (
-        <div classNameName="min-h-screen flex flex-col flex-auto flex-shrink-0 antialiased bg-gray-700">
+        <div classNameName="min-h-screen flex flex-col flex-auto flex-shrink-0 antialiased dark:bg-gray-800">
             <SideBar user={auth.user}></SideBar>
-            <div class="h-full ml-14 mb-10 md:ml-64 bg-white" >
+            <div class="h-full ml-14 mb-10 md:ml-64" >
                 <main className="ml-1">
                     {children}
                 </main>

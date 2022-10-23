@@ -2,7 +2,7 @@ import React from 'react'
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link} from '@inertiajs/inertia-react';
 
-export default function Projects(props) {
+export default function ViewProject(props) {
   console.log(props)
   return (
     <AuthenticatedLayout

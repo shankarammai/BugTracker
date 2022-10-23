@@ -40,17 +40,17 @@ export default function CreateProject(props) {
             <div className="bg-white rounded-lg p-8 flex flex-col md:ml-auto w-full mt-10 md:mt-0 relative z-10 shadow-md">
               <h2 className="text-gray-900 text-lg mb-1 font-medium title-font">Enter Project Details</h2>
               <div className="relative mb-4">
-                <label for="title" className="leading-7 text-sm text-gray-600">Title</label>
+                <label for="title" className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">Title</label>
                 <input onChange={onHandleChange} value={data.title} type="text" id="title" name="title" className="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out" />
                 <InputError message={errors.title} className="mt-2" />
               </div>
               <div className="relative mb-4">
-                <label for="budget" className="leading-7 text-sm text-gray-600">Budget</label>
+                <label for="budget" className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">Budget</label>
                 <input onChange={onHandleChange} type="number" value={data.budget} id="budget" name="budget" className="w-full bg-white rounded border border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 text-base outline-none text-gray-700 py-1 px-3 leading-8 transition-colors duration-200 ease-in-out" />
                 <InputError message={errors.budget} className="mt-2" />
               </div>
               <div className="relative mb-4">
-                <label for="dueDate" className="leading-7 text-sm text-gray-600">Due Date</label>
+                <label for="dueDate" className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">Due Date</label>
                 <DatePicker name="dueDate" locale="en-GB" showTimeSelect selected={data.dueDate} onChange={(date) => setData('dueDate', date)} timeFormat="p" timeIntervals={15} dateFormat="Pp" />
                 <InputError message={errors.dueDate} className="mt-2" />
               </div>
@@ -66,7 +66,7 @@ export default function CreateProject(props) {
               </div>
 
               <div className="relative mb-8">
-                <label for="description" className="leading-7 text-sm text-gray-600">Description</label>
+                <label for="description" className="block uppercase tracking-wide text-gray-700 text-xs font-bold mb-2">Description</label>
                 <ReactQuill className="h-64 mb-2" name="description" theme="snow" value={data.description} onChange={(desc) => setData('description', desc)} />
                 <InputError message={errors.description} className="mt-2" />
               </div>
