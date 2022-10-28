@@ -47,7 +47,7 @@ class Tasks extends Controller
             'title' => ['required', 'string'],
             'priority' => ['required', 'in:Low,High,Medium'],
             'issue_type' => ['required', 'in:Task,Bug,Research'],
-            'status' => ['required', 'in:New,Opened,In work,Need feedback,Closed,Realized,Rework'],
+            'status' => ['required', 'in:Backlog,Development,In Progress,Done'],
             'hours_spent' => ['required', 'numeric'],
             'content' => ['required', 'string'],
         ]);
@@ -112,8 +112,13 @@ class Tasks extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Project $project, Task $task)
     {
-        //
+
+        if ($project->creator == Auth::user()->id) {
+            $task->delete();
+            return response()->json(['success' => true]);
+        }
+        return response()->json(['success' => false]);
     }
 }

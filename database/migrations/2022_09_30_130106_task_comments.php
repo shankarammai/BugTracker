@@ -16,10 +16,11 @@ return new class extends Migration
         //
         Schema::create('task_comments', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('task_id')->constrained('tasks');
-            $table->foreignUuid('commented_by')->references('id')->on('users');
+            $table->foreignUuid('task_id')->constrained('tasks')->onDelete('cascade');
+            $table->foreignUuid('commented_by')->references('id')->on('users')->onDelete('cascade');
             $table->longText('content');
             $table->timestamps();
+            $table->softDeletes();
         });
 
     }

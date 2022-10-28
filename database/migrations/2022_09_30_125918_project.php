@@ -17,13 +17,14 @@ return new class extends Migration
         Schema::create('projects', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('parent_id')->default(0);
-            $table->uuid('creator');
+            $table->foreignUuid('creator')->references('id')->on('users')->onDelete('cascade');;
             $table->string('title');
             $table->text('description', 65535);
             $table->decimal('budget', 12)->default(0.00);
             $table->timestamp('due_date')->default(null);
             $table->enum('status', ["Not Started", "Started", "On Progress", "Completed"])->default("Not Started");
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

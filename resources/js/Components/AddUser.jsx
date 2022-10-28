@@ -97,7 +97,7 @@ export default function AddTask({ onUserAddClick, data, setUserModal }) {
                             {searchedUsers &&
                                 searchedUsers.map((user, index) => {
                                     let fullname = user.name.split(" ");
-                                    let nameInitials = fullname.shift()[0] + fullname.pop()[0];
+                                    let nameInitials = (fullname.length>1)?fullname.shift()[0] + fullname.pop()[0]:fullname.shift()[0];
                                     return <>
                                         <div class="flex justify-between space-x-4 bg-orange-100 mx-8 my-2">
                                             {/* <div class="my-2 ml-4 inline-flex overflow-hidden relative justify-center items-center w-10 h-10 bg-gray-100 rounded-full dark:bg-gray-600">

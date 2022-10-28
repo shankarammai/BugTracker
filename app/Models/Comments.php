@@ -13,6 +13,9 @@ class Comments extends Model
     protected $table = 'task_comments';
     protected $primaryKey = 'id';
     protected $fillable = ['task_id', 'commented_by', 'content'];
+    protected $hidden = [
+        
+    ];
 
 
     public function task()

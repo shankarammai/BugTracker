@@ -5,19 +5,22 @@ import NavLink from '@/Components/NavLink';
 import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
 import { Link } from '@inertiajs/inertia-react';
 import SideBar from '@/Components/SideBar';
+import 'bootstrap/dist/css/bootstrap.css';
+import "bootstrap-icons/font/bootstrap-icons.css";
+
 
 
 export default function Authenticated({ auth, header, children }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
 
     return (
-        <div classNameName="min-h-screen flex flex-col flex-auto flex-shrink-0 antialiased dark:bg-gray-800">
-            <SideBar user={auth.user}></SideBar>
-            <div class="h-full ml-14 mb-10 md:ml-64" >
-                <main className="ml-1">
+        <div className="container-fluid">
+            <div className="row flex-nowrap">
+                <SideBar user={auth.user}></SideBar>
+                <div className="col py-3">
                     {children}
-                </main>
-             </div>
+                </div>
+            </div>
         </div>
     );
 }

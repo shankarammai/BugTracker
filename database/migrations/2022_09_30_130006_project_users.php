@@ -16,10 +16,11 @@ return new class extends Migration
         //
         Schema::create('project_users', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->foreignUuid('project_id')->references('id')->on('projects');
+            $table->foreignUuid('project_id')->references('id')->on('projects')->onDelete('cascade');;
             $table->foreignUuid('user_id')->references('id')->on('users');
             $table->enum('role', ['Manager', 'Developer', 'Tester', 'Other']);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

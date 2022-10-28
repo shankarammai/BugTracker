@@ -11,6 +11,11 @@ export default function ViewProject(props) {
       header={<h2 classNameName="font-semibold text-xl text-gray-800 leading-tight">Projects</h2>}
     >
       <Head title="Projects" />
+
+
+
+
+      
       <section class="text-gray-600 body-font bg-white">
         <div class="container px-5 mx-auto">
           <div class="flex flex-wrap w-full mb-20 flex-col items-center text-center">

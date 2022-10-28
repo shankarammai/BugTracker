@@ -66,7 +66,10 @@ class Projects extends Controller
             'status' => $request->post('status'),
             'description' => $request->post('description'),
         ]);
-        return redirect()->route('projects.show', ['project' => $project->id, 'success' => true, 'message' => 'Project Successfully Created']);
+        if ($project) {
+            return redirect()->route('projects.show', ['project' => $project->id])->with(['success' => true, 'message' => 'Project Created Successfully']);
+        }
+        return redirect()->route('projects.show', ['project' => $project->id])->with(['success' => false, 'message' => 'Something Went Wrong']);
     }
 
     /**
@@ -86,13 +89,17 @@ class Projects extends Controller
 
         }
 
-        $project = Project::with(['users', 'tasks'])->where('id', $id)->first();
+        $project = Project::with(['users', 'tasks', 'tasks.comments.user:id,name,role,email'])->find($id);
         if (!$project) {
             abort(404);
         }
 
         if ($project->creator == $user->id) {
-            return Inertia::render('Manager/ViewProject', ['project' => $project]);
+            $projectUsers = ProjectUsers::with('user:id,name,email',)->where('project_id', $id)->get();
+            $onlyUsersArray = $projectUsers->map(function ($projectUser) {
+                return $projectUser->user;
+            });
+            return Inertia::render('Manager/ViewProject', ['project' => $project, 'users' => $onlyUsersArray]);
         }
 
         return redirect('/projects/');
@@ -116,9 +123,27 @@ class Projects extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Project $project)
     {
         //
+        $request->validate([
+            'title' => ['required', 'string'],
+            'budget' => ['required', 'numeric'],
+            'dueDate' => ['required', 'string'],
+            'status' => ['required', 'in:Not Started,Started,On Progress,Completed'],
+            'description' => ['required', 'string'],
+        ]);
+        $projectCreated = $project->update([
+            'title' => $request->post('title'),
+            'budget' => $request->post('budget'),
+            'due_date' => Carbon::parse($request->post('dueDate')),
+            'status' => $request->post('status'),
+            'description' => $request->post('description'),
+        ]);
+        if ($project) {
+            return redirect()->route('projects.show', ['project' => $project->id])->with(['success' => true, 'message' => 'Project Successfully Updated']);
+        }
+        return redirect()->route('projects.show', ['project' => $project->id])->with(['success' => false, 'message' => 'Something Went Wrong']);
     }
 
     /**
@@ -127,8 +152,12 @@ class Projects extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Project $project)
     {
-        //
+        if ($project->creator == Auth::user()->id) {
+            $project->delete();
+            return response()->json(['success' => true]);
+        }
+        return response()->json(['success' => false]);
     }
 }

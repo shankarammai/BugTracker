@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Project;
 use App\Models\User;
 use App\Models\ProjectUsers;
 use Illuminate\Http\Request;
@@ -110,10 +111,18 @@ class ProjectUsersController extends Controller
      * @param  \App\Models\projectusers  $projectusers
      * @return \Illuminate\Http\Response
      */
-    public function destroy(ProjectUsers $projectusers)
+    public function destroy(ProjectUsers $projectUser)
     {
         //
+        $ProjectCreator = Project::where('id', $projectUser->project_id)->select(['name'])->first();
+        if ($ProjectCreator == Auth::user()->id) {
+            $projectUser->delete();
+            return response()->json(['success' => true]);
+        }
+        return response()->json(['success' => false]);
     }
+
+
 
     public function getAllUsers(Request $request)
     {

@@ -26,9 +26,14 @@
         "admin-lte": "3.0",
         "alertifyjs": "^1.13.1",
         "bootstrap": "^5.2.2",
+        "bootstrap-icons": "^1.9.1",
+        "moment": "^2.29.4",
+        "react-beautiful-dnd": "^13.1.1",
         "react-bootstrap": "^2.5.0",
         "react-datepicker": "^4.8.0",
         "react-icons": "^4.4.0",
-        "react-quill": "^2.0.0"
+        "react-moment": "^1.1.2",
+        "react-quill": "^2.0.0",
+        "react-select": "^5.5.6"
     }
 }
