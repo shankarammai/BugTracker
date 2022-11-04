@@ -14,6 +14,7 @@ import { iteratee } from 'lodash';
 import moment from 'moment';
 import Dropdown from 'react-bootstrap/Dropdown';
 import ViewTask from './ViewTask';
+import alertify from 'alertifyjs';
 
 export default function TaskBoard({ project, users ,auth}) {
     const [addTaskModal, setAddTaskModal] = useState(false);
@@ -21,33 +22,80 @@ export default function TaskBoard({ project, users ,auth}) {
     const [openedTask, setOpenedTask] = useState({});
     const [openedTaskModal, setOpenedTaskModal] = useState(false);
 
-
-    const tasks_categorised = [
+    const [tasks_categorised, setTaskCategorised] = useState([
         {
             'id': 'Backlog',
+            'sortId':1,
             'name': 'Backlog',
             'items': allTasks.filter((task) => task.status == 'Backlog')
         },
         {
             'id': 'Development',
+            'sortId':2,
             'name': 'Development',
             'items': allTasks.filter((task) => task.status == 'Development')
         }, {
             'id': 'In Progress',
+            'sortId':3,
             'name': 'In Progress',
             'items': allTasks.filter((task) => task.status == 'In Progress')
         }, {
             'id': 'Done',
+            'sortId':4,
             'name': 'Done',
             'items': allTasks.filter((task) => task.status == 'Done')
         },
 
-    ];
+    ]);
+
+    const onUpdateFromChild = (taskId,data) => { 
+        console.log('updated');
+        let filteredTask = allTasks.filter((task) => task.id != taskId);
+        let newTasks = [...filteredTask, data];
+        console.log(newTasks);
+        setAllTasks((prevTasks)=>[...newTasks]);
+        console.log(allTasks);
+    }
 
     const onDragEnd = (result) => {
         if (!result.destination) return;
         const { source, destination } = result;
         console.log(result);
+        if (source.droppableId != destination.droppableId) {
+            const sourceColumn = tasks_categorised.filter(item => item.id == source.droppableId)[0];
+            const destinationColumn = tasks_categorised.filter(item => item.id == destination.droppableId)[0];
+            //removing in action colums   
+            let nonActionColumns=tasks_categorised.filter(item => (item.id != sourceColumn.id && item.id != destinationColumn.id));
+            const sourceTasks = [...sourceColumn.items];
+            const destinationTasks = [...destinationColumn.items];
+
+            //remove the dragged item from source and add to destination
+            const [draggedItem] = sourceTasks.splice(source.index, 1);
+            destinationTasks.splice(destination.index,0, draggedItem);
+            sourceColumn.items = sourceTasks;
+            destinationColumn.items = destinationTasks;
+
+            //st the new state of the tasks
+            let newTaskCategorised = [...nonActionColumns, sourceColumn, destinationColumn];
+            newTaskCategorised.sort((a, b) => a.sortId - b.sortId);
+            setTaskCategorised(newTaskCategorised);
+
+            //send request to the backend to update
+            changeTaskStatus(result.draggableId,destination.droppableId);
+        }
+
+    }
+
+    const changeTaskStatus = (taskId, status) => { 
+           axios.put(`/projects/${project.id}/tasks/${taskId}/`,
+            {status})
+            .then((response) => {
+                console.log(response.data);
+                (response.data.success) ? alertify.success('Status Changed') : alertify.error(response.data.message)
+            }, (error) => {
+                console.log(error);
+                alertify.error(error);
+            });
     }
 
     const TaskClicked = (index, task) => { 
@@ -65,7 +113,7 @@ export default function TaskBoard({ project, users ,auth}) {
             <div className="row">
                 <div className="col-sm">
                     <h4 className="page-title">{project.title}
-                        <button onClick={() => setAddTaskModal(true)} className="btn btn-success btn-sm ms-3">Add New</button>
+                        <button onClick={() => setAddTaskModal(true)} className="btn btn-success btn-sm ms-3">Add New Task</button>
                     </h4>
                 </div>
                 <div className="col-sm">
@@ -125,25 +173,6 @@ export default function TaskBoard({ project, users ,auth}) {
                                                                             <p className="my-2">
                                                                                 {item.title}
                                                                             </p>
-                                                                            <p className="mb-0">
-                                                                                <span className="text-nowrap mb-0 my-2">
-                                                                                    <i class="bi bi-chat-left-text mr-1"></i>
-                                                                                    <b>{item.comments.length}</b> Comments
-                                                                                </span>
-
-                                                                                <span className="text-nowrap mb-0 my-2 float-end">
-                                                                                    <Dropdown>
-                                                                                        <Dropdown.Toggle variant="secondary" id="dropdown-basic" size="sm">
-                                                                                           <i class="bi bi-three-dots-vertical"></i>
-                                                                                        </Dropdown.Toggle>
-                                                                                        <Dropdown.Menu>
-                                                                                            <Dropdown.Item as="button">Delete</Dropdown.Item>
-                                                                                            <Dropdown.Item href="#">Open</Dropdown.Item>
-                                                                                            <Dropdown.Item href="#">Something else</Dropdown.Item>
-                                                                                        </Dropdown.Menu>
-                                                                                    </Dropdown>
-                                                                                </span>
-                                                                            </p>
                                                                         </div>
                                                                     </div>
                                                                 );
@@ -152,9 +181,6 @@ export default function TaskBoard({ project, users ,auth}) {
                                                     );
                                                 })}
                                                 {provided.placeholder}
-
-
-
                                             </div>
                                         )
                                     }}
@@ -190,7 +216,7 @@ export default function TaskBoard({ project, users ,auth}) {
                     <Modal.Title>Create a New Task</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <ViewTask task={openedTask} project={project} users={users} auth={auth} />
+                    <ViewTask task={openedTask} project={project} users={users} auth={auth} onUpdate={onUpdateFromChild} />
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => setOpenedTaskModal(false)}>

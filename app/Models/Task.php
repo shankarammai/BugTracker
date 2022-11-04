@@ -6,6 +6,7 @@ use App\Traits\Uuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\User;
+
 class Task extends Model
 {
     use HasFactory, Uuids;
@@ -21,7 +22,7 @@ class Task extends Model
 
     public function comments()
     {
-        return $this->hasMany(Comments::class, 'task_id');
+        return $this->hasMany(Comments::class, 'task_id')->orderBy('created_at', 'DESC');
     }
 
     public function project()
