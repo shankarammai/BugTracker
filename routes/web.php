@@ -32,7 +32,7 @@ Route::get('/', function () {
 
 Route::get('/dashboard', [Dashboard::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 Route::resource('/projects', Projects::class)->middleware(['auth', 'verified']);
-Route::resource('/projectUsers', ProjectUsersController::class)->middleware(['auth', 'verified']);
+Route::resource('projects.projectUsers', ProjectUsersController::class)->middleware(['auth', 'verified']);
 Route::post('/projectUsers/searchUsers', [ProjectUsersController::class, 'getProjectUsers'])->middleware(['auth', 'verified']);
 
 

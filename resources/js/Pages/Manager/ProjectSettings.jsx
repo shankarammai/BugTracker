@@ -29,11 +29,6 @@ export default function ProjectSettings({ project, users, }) {
         setData(event.target.name, event.target.type === 'checkbox' ? event.target.checked : event.target.value);
     };
 
-    transform((data) => ({
-        ...data,
-        assigned_to: data.assigned_to.map((item) => item.value)
-    }))
-
     const submit = (e) => {
         e.preventDefault();
 
@@ -97,10 +92,10 @@ export default function ProjectSettings({ project, users, }) {
             </form>
             <Modal size='lg' show={addUserModal} onHide={() => setAddUserModal(false)}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Create a New Task</Modal.Title>
+                    <Modal.Title>Add a User</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <AddUser></AddUser>
+                    <AddUser users={users} project={project}></AddUser>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => (setAddUserModal(false))}>

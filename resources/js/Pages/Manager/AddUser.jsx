@@ -1,19 +1,17 @@
-import { Inertia } from '@inertiajs/inertia';
-import { method } from 'lodash';
 import alertify from 'alertifyjs';
 import 'alertifyjs/build/css/alertify.css';
 import React, { useState, useRef } from 'react'
 import Spinner from 'react-bootstrap/Spinner';
 
 
-export default function AddUser({ onUserAddClick, data, setUserModal }) {
+export default function AddUser({ onUserAddClick, data, setUserModal,project,users }) {
     const [newUsers, setNewUsers] = useState([]);
     const [loading, setLoading] = useState(false);
     const [searchedUsers, setSearchedUsers] = useState(null);
     const searchEmailValue = useRef();
+    const userIds = users.map((user) => user.id);
 
     const searchForUsers = () => {
-        setLoading(true);
         axios.post('/users/searchUsers',
             { searchEmail: searchEmailValue.current.value })
             .then((response) => {
@@ -22,14 +20,12 @@ export default function AddUser({ onUserAddClick, data, setUserModal }) {
             }, (error) => {
                 console.log(error);
             });
-        setLoading(false);
     }
 
     const addUserToProject = (userId, index) => {
-        setLoading(true);
         let role = searchedUsers[index]['role'] || 'Developer';
-        axios.post('/projectUsers',
-            { userId, role, projectId: window.location.pathname.split('/').pop() })
+        axios.post(`/projects/${project.id}/projectUsers/`,
+            { userId, role, projectId:project.id })
             .then((response) => {
                 console.log(response.data);
                 (response.data.success) ? alertify.success('User Successfully Added') : alertify.error(response.data.message)
@@ -37,21 +33,31 @@ export default function AddUser({ onUserAddClick, data, setUserModal }) {
                 console.log(error);
                 alertify.error(error);
             });
-        setLoading(false);
     }
 
+    const deleteUserFromProject = (userId) => { 
+        axios.delete(`/projects/${project.id}/projectUsers/${userId}`)
+            .then((response) => {
+                console.log(response.data);
+                (response.data.success) ? alertify.success('User Successfully Removed') : alertify.error(response.data.message)
+            }, (error) => {
+                console.log(error);
+                alertify.error(error);
+            });
 
+
+    }
     const roleHandelChange = (index) => {
         let previousSearched = searchedUsers;
         previousSearched[index]['role'] = event.target.value;
         setSearchedUsers(previousSearched);
     }
     return (
-
         <div className="container-fluid">
             <div className="row">
                 <div class="mx-auto flex w-full flex-col justify-between space-y-4 px-8 sm:flex-row sm:space-x-4 sm:space-y-0 sm:px-0 lg:w-2/3">
                     <div class="relative w-full flex-grow">
+                        <label for="voice-search" class="sr-only">Search</label>
                         <div class="relative w-full">
                             <div className="col-12">
                                 <input ref={searchEmailValue} type="text" id="voice-search" class="ml-2 form-control form-control-light" placeholder="Search Email or User Full Name" required />
@@ -72,7 +78,10 @@ export default function AddUser({ onUserAddClick, data, setUserModal }) {
                         <div className="row mt-1">
                             <div className="col-sm">
                                 <div className="d-flex flex-row user p-1">
-                                    <img src="#" class="float-left rounded-circle bg-secondary" alt={nameInitials} />                                    <div className="d-flex flex-column ml-2">
+                                    <div style={{ "alignItems": "center", "display": "flex", "justifyContent": "center", "backgroundColor": "#d1d5db", "color": "#fff", "borderRadius": "50%", "height": "3rem", "width": "3rem" }}>
+                                        {nameInitials}
+                                    </div>
+                                    <div className="d-flex flex-column ml-2">
                                         <span className="name font-weight-bold">{user.email}</span>
                                     </div>
                                 </div>
@@ -88,16 +97,16 @@ export default function AddUser({ onUserAddClick, data, setUserModal }) {
                                 </select>
 
                             </div>
-                            <div className="col-sm">
-                                <button onClick={() => addUserToProject(user.id, index)} type="button" class="inline-flex items-center justify-center w-10 h-10 mr-2 text-indigo-100 transition-colors duration-150 bg-indigo-700 rounded-lg focus:shadow-outline hover:bg-indigo-800">
-                                    <svg class="w-4 h-4 fill-current" viewBox="0 0 20 20"><path d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" fill-rule="evenodd"></path></svg>
+                                <div className="col-sm">
+                                    <button onClick={() => userIds.includes(user.id)?deleteUserFromProject(user.id): addUserToProject(user.id, index)} type="button" class={userIds.includes(user.id)?'btn btn-danger':'btn btn-primary'}>
+                                    {userIds.includes(user.id)?'Remove':'Add'}
                                 </button>
-                            </div>
+                                </div>
                         </div>
 
                     </>
                 }
                 )}
         </div>
-    )
+    );
 }

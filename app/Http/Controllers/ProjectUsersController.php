@@ -111,11 +111,10 @@ class ProjectUsersController extends Controller
      * @param  \App\Models\projectusers  $projectusers
      * @return \Illuminate\Http\Response
      */
-    public function destroy(ProjectUsers $projectUser)
+    public function destroy(Project $project, $userId)
     {
-        //
-        $ProjectCreator = Project::where('id', $projectUser->project_id)->select(['name'])->first();
-        if ($ProjectCreator == Auth::user()->id) {
+        if ($project->creator == Auth::user()->id) {
+            $projectUser = ProjectUsers::where(['project_id' => $project->id, 'user_id' => $userId])->first();
             $projectUser->delete();
             return response()->json(['success' => true]);
         }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Comments;
 use App\Models\Project;
+use App\Models\Task;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -48,8 +49,8 @@ class CommentsController extends Controller
             'content' => $request->post('content')
         ]);
         if ($commentId) {
-            $comment = Comments::where('id', $commentId->id)->with('user:name,email,id,role')->first();
-            return response()->json(['success' => true, 'comment' => $comment]);
+            $updatedTask = Task::with('comments.user:id,name,role,email')->find($taskId);
+            return response()->json(['success' => true, 'task' => $updatedTask]);
         }
         return response()->json(['success' => false]);
     }
@@ -99,7 +100,8 @@ class CommentsController extends Controller
         // 
         if ($comment->commented_by == Auth::user()->id || $project->creator == Auth::user()->id) {
             $comment->delete();
-            return response()->json(['success' => true]);
+            $updatedTask = Task::with('comments.user:id,name,role,email')->find($taskId);
+            return response()->json(['success' => true, 'data' => $updatedTask]);
         }
         return response()->json(['success' => false]);
     }

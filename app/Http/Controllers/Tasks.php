@@ -52,7 +52,7 @@ class Tasks extends Controller
             'content' => ['required', 'string'],
         ]);
 
-        $taskId = Task::create([
+        $task = Task::create([
             'project_id' => $project_id,
             'title' => $request->post('title'),
             'content' => $request->post('content'),
@@ -63,10 +63,11 @@ class Tasks extends Controller
             'assigned_to' => $request->post('assigned_to'),
             'creator' => Auth::user()->id,
         ]);
-        if ($taskId) {
-            return redirect()->route('projects.tasks.show', ['project' => $project_id, 'task' => $taskId]);
+        if ($task) {
+            $task->fresh()->load('comments.user:id,name,role,email');
+            return response()->json(['success' => true, 'data' => $task]);
         }
-        return redirect()->route('projects.tasks.index', ['project' => $project_id]);
+        return response()->json(['success' => false, 'data' => $task]);
     }
 
     /**
@@ -106,8 +107,8 @@ class Tasks extends Controller
         if ($request->has('status') && !$request->has('title')) {
             $task->status = $request->post('status');
             if ($task->save()) {
-                $task->fresh()->load('comments.user:id,name,role,email');
-                return response()->json(['success' => true, 'data' => $task]);
+                $updatedTask = Task::with('comments.user:id,name,role,email')->find($task->id);
+                return response()->json(['success' => true, 'data' => $updatedTask]);
             }
         }
         if ($request->has('title')) {
@@ -121,13 +122,13 @@ class Tasks extends Controller
             ]);
 
             $task->title = $request->post('title');
+            $task->status = $request->post('status');
             $task->assigned_to = $request->post('assigned_to');
             $task->priority = $request->post('priority');
             $task->issue_type = $request->post('issue_type');
             $task->hours_spent = $request->post('hours_spent');
             $task->content = $request->post('content');
             if ($task->save()) {
-                //$task->fresh()->load('comments.user:id,name,role,email');
                 $updatedTask = Task::with('comments.user:id,name,role,email')->find($task->id);
                 return response()->json(['success' => true, 'data' => $updatedTask]);
             }

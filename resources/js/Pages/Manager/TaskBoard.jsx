@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import InputError from '@/Components/InputError';
 import { Head, Link, useForm } from '@inertiajs/inertia-react';
 import ReactQuill from 'react-quill';
@@ -15,63 +15,86 @@ import moment from 'moment';
 import Dropdown from 'react-bootstrap/Dropdown';
 import ViewTask from './ViewTask';
 import alertify from 'alertifyjs';
+alertify.set('notifier','position', 'top-right');
 
-export default function TaskBoard({ project, users ,auth}) {
+export default function TaskBoard({ project, users, auth }) {
     const [addTaskModal, setAddTaskModal] = useState(false);
     const [allTasks, setAllTasks] = useState(project.tasks);
     const [openedTask, setOpenedTask] = useState({});
     const [openedTaskModal, setOpenedTaskModal] = useState(false);
+    const [tasks_categorised, setTaskCategorised] = useState([]);
 
-    const [tasks_categorised, setTaskCategorised] = useState([
-        {
-            'id': 'Backlog',
-            'sortId':1,
-            'name': 'Backlog',
-            'items': allTasks.filter((task) => task.status == 'Backlog')
-        },
-        {
-            'id': 'Development',
-            'sortId':2,
-            'name': 'Development',
-            'items': allTasks.filter((task) => task.status == 'Development')
-        }, {
-            'id': 'In Progress',
-            'sortId':3,
-            'name': 'In Progress',
-            'items': allTasks.filter((task) => task.status == 'In Progress')
-        }, {
-            'id': 'Done',
-            'sortId':4,
-            'name': 'Done',
-            'items': allTasks.filter((task) => task.status == 'Done')
-        },
+    const [tasksToDisplay, setTasksToDisplay] = useState([...allTasks]);
+    const [showOnlyMineToggle, setShowOnlyMineToggle] = useState(false);
 
-    ]);
 
-    const onUpdateFromChild = (taskId,data) => { 
-        console.log('updated');
-        let filteredTask = allTasks.filter((task) => task.id != taskId);
-        let newTasks = [...filteredTask, data];
-        console.log(newTasks);
-        setAllTasks((prevTasks)=>[...newTasks]);
-        console.log(allTasks);
+    useEffect(() => {
+        if (showOnlyMineToggle) {
+            setTasksToDisplay((prev) =>
+                prev.filter((task) => {
+                    return task.assigned_to.includes(auth.user.id);
+                }));
+        }
+        else {
+            setTasksToDisplay((prev) => [...allTasks]);
+        }
+    }, [allTasks, showOnlyMineToggle])
+
+
+    useEffect(() => {
+        setTaskCategorised(
+            [{
+                'id': 'Backlog',
+                'sortId': 1,
+                'name': 'Backlog',
+                'items': tasksToDisplay.filter((task) => task.status == 'Backlog')
+            },
+            {
+                'id': 'Development',
+                'sortId': 2,
+                'name': 'Development',
+                'items': tasksToDisplay.filter((task) => task.status == 'Development')
+            }, {
+                'id': 'In Progress',
+                'sortId': 3,
+                'name': 'In Progress',
+                'items': tasksToDisplay.filter((task) => task.status == 'In Progress')
+            }, {
+                'id': 'Done',
+                'sortId': 4,
+                'name': 'Done',
+                'items': tasksToDisplay.filter((task) => task.status == 'Done')
+            }
+            ]);
+
+    }, [tasksToDisplay])
+
+    const onUpdateFromChild = (taskId, data) => {
+        setAllTasks((prevTasks) => [...prevTasks.filter((task) => task.id != taskId), data]);
+        setOpenedTask(data);
+    }
+
+    const onCreateTaskFromChild = (task) => {
+        setAllTasks((prevTasks) => [task, ...prevTasks]);
+        setAddTaskModal(false);
+        setOpenedTask(task);
+        setOpenedTaskModal(true);
     }
 
     const onDragEnd = (result) => {
         if (!result.destination) return;
         const { source, destination } = result;
-        console.log(result);
         if (source.droppableId != destination.droppableId) {
             const sourceColumn = tasks_categorised.filter(item => item.id == source.droppableId)[0];
             const destinationColumn = tasks_categorised.filter(item => item.id == destination.droppableId)[0];
             //removing in action colums   
-            let nonActionColumns=tasks_categorised.filter(item => (item.id != sourceColumn.id && item.id != destinationColumn.id));
+            let nonActionColumns = tasks_categorised.filter(item => (item.id != sourceColumn.id && item.id != destinationColumn.id));
             const sourceTasks = [...sourceColumn.items];
             const destinationTasks = [...destinationColumn.items];
 
             //remove the dragged item from source and add to destination
             const [draggedItem] = sourceTasks.splice(source.index, 1);
-            destinationTasks.splice(destination.index,0, draggedItem);
+            destinationTasks.splice(destination.index, 0, draggedItem);
             sourceColumn.items = sourceTasks;
             destinationColumn.items = destinationTasks;
 
@@ -81,31 +104,40 @@ export default function TaskBoard({ project, users ,auth}) {
             setTaskCategorised(newTaskCategorised);
 
             //send request to the backend to update
-            changeTaskStatus(result.draggableId,destination.droppableId);
+            changeTaskStatus(result.draggableId, destination.droppableId);
         }
 
     }
 
-    const changeTaskStatus = (taskId, status) => { 
-           axios.put(`/projects/${project.id}/tasks/${taskId}/`,
-            {status})
+    const changeTaskStatus = (taskId, status) => {
+        axios.put(`/projects/${project.id}/tasks/${taskId}/`,
+            { status })
             .then((response) => {
-                console.log(response.data);
                 (response.data.success) ? alertify.success('Status Changed') : alertify.error(response.data.message)
+                onUpdateFromChild(taskId, response.data.data);
             }, (error) => {
                 console.log(error);
                 alertify.error(error);
             });
     }
 
-    const TaskClicked = (index, task) => { 
-        console.log(index,task);
+    const TaskClicked = (index, task) => {
         setOpenedTask(task,
-            setOpenedTaskModal(()=>true)
+            setOpenedTaskModal(() => true)
         );
+    }
 
+    const showAssignedToMe = () => {
+        setShowOnlyMineToggle(!showOnlyMineToggle);
+    }
 
+    const onTaskDeleteFromchild = (taskId) => {
+        setAllTasks(allTasks.filter((task) => task.id != taskId));
+    }
 
+    const onCommentsUpdate = (taskId, data) => {
+        setAllTasks((prevTasks) => [...prevTasks.filter((task) => task.id != taskId), data]);
+        setOpenedTask(data);
     }
 
     return (
@@ -117,7 +149,7 @@ export default function TaskBoard({ project, users ,auth}) {
                     </h4>
                 </div>
                 <div className="col-sm">
-                    only my issues | recently added
+                    <button onClick={showAssignedToMe} className={showOnlyMineToggle ? 'btn btn-secondary' : 'btn btn-light'}> Assigned to me</button> | recently added
 
                 </div>
                 <div className="col-sm">
@@ -162,7 +194,7 @@ export default function TaskBoard({ project, users ,auth}) {
                                                                         {...provided.draggableProps}
                                                                         {...provided.dragHandleProps}
                                                                         className="card mb-1"
-                                                                            onClick={()=>TaskClicked(index,item)}
+                                                                        onClick={() => TaskClicked(index, item)}
                                                                     >
                                                                         <div className="card-body p-1">
                                                                             <small className="float-end text-muted">
@@ -202,7 +234,7 @@ export default function TaskBoard({ project, users ,auth}) {
                     <Modal.Title>Create a New Task</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <CreateTask project={project} users={users} />
+                    <CreateTask project={project} users={users} onCreateTask={onCreateTaskFromChild} />
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => (setAddTaskModal(false))}>
@@ -216,7 +248,7 @@ export default function TaskBoard({ project, users ,auth}) {
                     <Modal.Title>Create a New Task</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <ViewTask task={openedTask} project={project} users={users} auth={auth} onUpdate={onUpdateFromChild} />
+                    <ViewTask task={openedTask} project={project} users={users} auth={auth} onUpdate={onUpdateFromChild} onTaskDelete={onTaskDeleteFromchild} onCommentsUpdate={onCommentsUpdate} />
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => setOpenedTaskModal(false)}>

@@ -18,22 +18,6 @@ import alertify from 'alertifyjs';
 import 'alertifyjs/build/css/alertify.css';
 
 function ViewProject(props) {
-    const [showTaskModal, setTaskModal] = useState(false);
-    const [showUserModal, setUserModal] = useState(false);
-
-    const { data, setData, post, processing, errors } = useForm({
-        title: '',
-        budget: '',
-        dueDate: new Date(),
-        description: '',
-        status: 'Not Started',
-    });
-    const addUser = () => {
-        console.log(hello);
-    }
-    const addTask = () => {
-        console.log(hello);
-    }
     console.log(props);
     if (props.flash.success) {
         alertify.set('notifier', 'position', 'top-right');

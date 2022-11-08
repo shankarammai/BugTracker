@@ -7,12 +7,13 @@ import Select from 'react-select'
 import makeAnimated from 'react-select/animated';
 import InputError from '@/Components/InputError';
 import alertify from 'alertifyjs';
+alertify.set('notifier','position', 'top-right');
 
 const animatedComponents = makeAnimated();
 export default function ViewTask(props) {
     const assignedUsers = props.users.filter(user => props.task.assigned_to.includes(user.id))
-        .map((user) => ({ 'value': user.id, 'label': user.email }));
-    const projectUsers = props.users.map((user) => ({ 'value': user.id, 'label': user.email }));
+        .map((user) => ({ 'value': user.id, 'label': user.email })) || [];
+    const projectUsers = props.users.map((user) => ({ 'value': user.id, 'label': user.email })) || {};
 
     const { data, setData, put, processing, errors, transform } = useForm({
         title: props.task.title,
@@ -31,10 +32,10 @@ export default function ViewTask(props) {
         axios.post(`/projects/${props.project.id}/tasks/${props.task.id}/comments/`,
             { 'content': newComment.current.value })
             .then((response) => {
-                console.log(response.data);
                 if (response.data.success) {
+                    setComments(response.data.task.comments);
                     newComment.current.value = "";
-                    setComments((prevComments) => [response.data.comment, ...prevComments]);
+                    props.onCommentsUpdate(props.task.id,response.data.task);
                 }
             }, (error) => {
                 console.log(error);
@@ -45,24 +46,27 @@ export default function ViewTask(props) {
         axios.delete(`/projects/${props.project.id}/tasks/${props.task.id}/comments/${commentId}`,
             { 'content': newComment.current.value })
             .then((response) => {
-                console.log(response.data);
                 if (response.data.success) {
                     setComments((prevComments) => prevComments.filter((comment, currentIndex) => index != currentIndex));
+                    props.onCommentsUpdate(props.task.id,data);
                 }
             }, (error) => {
                 console.log(error);
+                alertify.error(error);
             });
     }
 
     const deleteTask = () => {
         axios.delete(`/projects/${props.project.id}/tasks/${props.task.id}/`)
             .then((response) => {
-                console.log(response.data);
                 if (response.data.success) {
                     (response.data.success) ? alertify.success('Deleted') : alertify.error(response.data.message);
+                    onTaskDelete(props.task.id);
                 }
             }, (error) => {
                 console.log(error);
+                 alertify.error(error);
+
             });
     }
 
@@ -81,16 +85,14 @@ export default function ViewTask(props) {
         data.assigned_to = assigned_to;
         axios.put(`/projects/${props.project.id}/tasks/${props.task.id}`, data)
             .then((response) => {
-            console.log(response.data);
-            if (response.data.success) {
-                (response.data.success) ? alertify.success('Updated') : alertify.error(response.data.message);
-                props.onUpdate(props.task.id,response.data.data);
-            }
-        }, (error) => {
-            console.log(error);
-        });
+                if (response.data.success) {
+                    (response.data.success) ? alertify.success('Updated') : alertify.error(response.data.message);
+                    props.onUpdate(props.task.id, response.data.data);
+                }
+            }, (error) => {
+                console.log(error);
+            });
     }
-    console.log(props);
     return (
         <div className="container-fluid">
             <nav aria-label="breadcrumb">
@@ -118,9 +120,9 @@ export default function ViewTask(props) {
                             <p className="col-sm"> <strong>Created at </strong>{moment(props.task.created_at).format('MMM Do YYYY')}</p>
                             <p className="col-sm"> <strong>Updated at </strong>{moment(props.task.updated_at).format('MMM Do YYYY')}</p>
                             <span className="col-sm">
-                            <button type="button" onClick={() => deleteTask()} class="btn btn-labeled btn-danger btn-sm float-end">
-                                <span class="btn-label"><i className="bi bi-trash"></i></span>Trash
-                            </button>
+                                <button type="button" onClick={() => deleteTask()} class="btn btn-labeled btn-danger btn-sm float-end">
+                                    <span class="btn-label"><i className="bi bi-trash"></i></span>Trash
+                                </button>
                             </span>
                         </div>
 
@@ -228,20 +230,25 @@ export default function ViewTask(props) {
                                 <input type="button" onClick={addComment} className="mt-2 btn btn-secondary pill-rounded" value="Post Comment" />
                             </div>
                             {comments && comments.map((comment, index) => {
+                                let fullname = comment.user.name.split(" ");
+                                let nameInitials = (fullname.length > 1) ? fullname.shift()[0] + fullname.pop()[0] : fullname.shift()[0];
+
                                 return <>
                                     <div className="container mt-2 border border-primary">
                                         <div className="d-flex justify-content-start row">
                                             <div className="col-md-12">
                                                 <div className="bg-white comment-section">
                                                     <div className="d-flex flex-row user p-1">
-                                                        <img className="rounded-circle" src="https://i.imgur.com/EQk6lCz.jpg" width="50" />
+                                                        <div style={{"alignItems":"center","display":"flex","justifyContent":"center","backgroundColor":"#d1d5db","color":"#fff","borderRadius":"50%","height":"3rem","width":"3rem"}}>{nameInitials}</div>
                                                         <div className="d-flex flex-column ml-2">
                                                             <span className="name font-weight-bold">{comment.user.name}</span>
                                                             <span>{moment(comment.created_at).format('HH:mm, MMM Do YYYY')}</span>
                                                         </div>
-                                                        <div className="col">                                                            {comment.commented_by == props.auth.user.id &&
-                                                                <button class="btn btn-sm btn-danger float-end" onClick={() => deleteComment(comment.id, index)}><i class="bi bi-trash-fill"></i></button>
-                                                            }</div>
+                                                        <div className="col">
+                                                            
+                                                            {comment.commented_by == props.auth.user.id &&
+                                                            <button class="btn btn-sm btn-danger float-end" onClick={() => deleteComment(comment.id, index)}><i class="bi bi-trash-fill"></i></button>
+                                                        }</div>
                                                     </div>
                                                     <div className="mt-1 p-1">
                                                         <p className="comment-content">{comment.content}</p>

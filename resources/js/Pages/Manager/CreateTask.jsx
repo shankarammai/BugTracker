@@ -9,12 +9,13 @@ import 'react-datepicker/dist/react-datepicker.css';
 import Modal from 'react-bootstrap/Modal';
 import Select from 'react-select'
 import makeAnimated from 'react-select/animated';
+import alertify from 'alertifyjs';
 
 
 
 const animatedComponents = makeAnimated();
 
-export default function CreateTask({ project, users }) {
+export default function CreateTask({ project, users,onCreateTask }) {
     const { data, setData, post, processing, errors, transform } = useForm({
         title: '',
         priority: 'Low',
@@ -38,7 +39,18 @@ export default function CreateTask({ project, users }) {
 
     const submit = (e) => {
         e.preventDefault();
-        post(`/projects/${project.id}/tasks`,);
+        let assigned_to = data.assigned_to.map((item) => item.value);
+        data.assigned_to = assigned_to;
+        axios.post(`/projects/${project.id}/tasks`, data)
+            .then((response) => {
+            console.log(response.data);
+            if (response.data.success) {
+                (response.data.success) ? alertify.success('Created') : alertify.error(response.data.message);
+                onCreateTask(response.data.data);
+            }
+        }, (error) => {
+            console.log(error);
+        });
     }
 
     const projectUsers = users.map((user) => ({ 'value': user.id, 'label': user.email }));
