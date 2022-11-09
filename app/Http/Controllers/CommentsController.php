@@ -101,7 +101,7 @@ class CommentsController extends Controller
         if ($comment->commented_by == Auth::user()->id || $project->creator == Auth::user()->id) {
             $comment->delete();
             $updatedTask = Task::with('comments.user:id,name,role,email')->find($taskId);
-            return response()->json(['success' => true, 'data' => $updatedTask]);
+            return response()->json(['success' => true, 'task' => $updatedTask]);
         }
         return response()->json(['success' => false]);
     }

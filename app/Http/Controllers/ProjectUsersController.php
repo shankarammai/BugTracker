@@ -66,7 +66,8 @@ class ProjectUsersController extends Controller
             'project_id' => $project_id
         ]);
         if ($projectUser) {
-            return response()->json(['success' => true, 'projectId' => $projectUser->id]);
+            $projectUser->load('user:name,id,email');
+            return response()->json(['success' => true, 'projectId' => $projectUser->id, 'user' => $projectUser->user]);
         }
         return response()->json(['success' => false, 'message' => 'Something Went Wrong']);
     }
@@ -116,7 +117,7 @@ class ProjectUsersController extends Controller
         if ($project->creator == Auth::user()->id) {
             $projectUser = ProjectUsers::where(['project_id' => $project->id, 'user_id' => $userId])->first();
             $projectUser->delete();
-            return response()->json(['success' => true]);
+            return response()->json(['success' => true, 'userId' => $userId]);
         }
         return response()->json(['success' => false]);
     }

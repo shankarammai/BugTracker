@@ -2,9 +2,11 @@ import React from 'react'
 import { Head, Link } from '@inertiajs/inertia-react';
 import 'bootstrap/dist/css/bootstrap.css';
 import "bootstrap-icons/font/bootstrap-icons.css";
- 
 
-export default function SideBar({user}) {
+
+export default function SideBar({ user }) {
+    let fullname = user.name.split(" ");
+    let nameInitials = (fullname.length > 1) ? fullname.shift()[0] + fullname.pop()[0] : fullname.shift()[0];
     return (
         <div className="col-auto col-md-3 col-xl-2 px-sm-2 px-0 bg-dark">
             <div className="d-flex flex-column align-items-center align-items-sm-start px-3 pt-2 text-white min-vh-100">
@@ -21,19 +23,20 @@ export default function SideBar({user}) {
                         </Link>
                     </li>
                 </ul>
-                <hr/>
+                <hr />
                 <div className="dropdown pb-4">
                     <a href="#" className="d-flex align-items-center text-white text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
-                        <img src="https://github.com/mdo.png" alt={user.name} width="30" height="30" className="rounded-circle"/>
+                        <div style={{ "alignItems": "center", "display": "flex", "justifyContent": "center", "backgroundColor": "#d1d5db", "color": "#fff", "borderRadius": "50%", "height": "3rem", "width": "3rem" }}>
+                            {nameInitials}
+                        </div>
                         <span className="d-none d-sm-inline mx-1">{user.name}</span>
                     </a>
                     <ul className="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
-                        {user.role == 'Manager' && 
-                        <li><a className="dropdown-item" href="#">New project...</a></li>
+                        {user.role == 'Manager' &&
+                            <li><Link className="dropdown-item" href="/projects/create">New project...</Link></li>
                         }
-                        <li><a className="dropdown-item" href="#">Settings</a></li>
                         <li>
-                            <hr className="dropdown-divider"/>
+                            <hr className="dropdown-divider" />
                         </li>
                         <li><Link href={route('logout')} method="post" as="button" className="dropdown-item"> Sign out</Link></li>
                     </ul>

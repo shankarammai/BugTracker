@@ -1,12 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React  from 'react'
 import InputError from '@/Components/InputError';
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link, useForm } from '@inertiajs/inertia-react';
+import { useForm } from '@inertiajs/inertia-react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import PrimaryButton from '@/Components/PrimaryButton';
 import 'react-datepicker/dist/react-datepicker.css';
-import Modal from 'react-bootstrap/Modal';
 import Select from 'react-select'
 import makeAnimated from 'react-select/animated';
 import alertify from 'alertifyjs';
@@ -16,7 +13,7 @@ import alertify from 'alertifyjs';
 const animatedComponents = makeAnimated();
 
 export default function CreateTask({ project, users,onCreateTask }) {
-    const { data, setData, post, processing, errors, transform } = useForm({
+    const { data, setData, post, processing, errors } = useForm({
         title: '',
         priority: 'Low',
         issue_type: 'Task',
@@ -25,12 +22,6 @@ export default function CreateTask({ project, users,onCreateTask }) {
         content: '',
         assigned_to: []
     });
-
-    transform((data) => ({
-        ...data,
-        assigned_to: data.assigned_to.map((item) => item.value)
-    }))
-
 
 
     const onHandleChange = (event) => {

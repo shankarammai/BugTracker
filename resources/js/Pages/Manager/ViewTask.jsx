@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { Head, Link, useForm } from '@inertiajs/inertia-react';
+import { Link, useForm } from '@inertiajs/inertia-react';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
 import moment from 'moment';
@@ -48,7 +48,7 @@ export default function ViewTask(props) {
             .then((response) => {
                 if (response.data.success) {
                     setComments((prevComments) => prevComments.filter((comment, currentIndex) => index != currentIndex));
-                    props.onCommentsUpdate(props.task.id,data);
+                    props.onCommentsUpdate(props.task.id,response.data.task);
                 }
             }, (error) => {
                 console.log(error);
@@ -61,7 +61,7 @@ export default function ViewTask(props) {
             .then((response) => {
                 if (response.data.success) {
                     (response.data.success) ? alertify.success('Deleted') : alertify.error(response.data.message);
-                    onTaskDelete(props.task.id);
+                    props.onTaskDelete(props.task.id);
                 }
             }, (error) => {
                 console.log(error);

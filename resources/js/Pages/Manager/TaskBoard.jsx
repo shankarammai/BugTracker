@@ -9,13 +9,11 @@ import Modal from 'react-bootstrap/Modal';
 import CreateTask from './CreateTask';
 import Button from 'react-bootstrap/Button';
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
-import { NonceProvider } from 'react-select';
-import { iteratee } from 'lodash';
 import moment from 'moment';
-import Dropdown from 'react-bootstrap/Dropdown';
 import ViewTask from './ViewTask';
 import alertify from 'alertifyjs';
-alertify.set('notifier','position', 'top-right');
+alertify.set('notifier', 'position', 'top-right');
+
 
 export default function TaskBoard({ project, users, auth }) {
     const [addTaskModal, setAddTaskModal] = useState(false);
@@ -133,6 +131,7 @@ export default function TaskBoard({ project, users, auth }) {
 
     const onTaskDeleteFromchild = (taskId) => {
         setAllTasks(allTasks.filter((task) => task.id != taskId));
+        setOpenedTaskModal(() => false);
     }
 
     const onCommentsUpdate = (taskId, data) => {

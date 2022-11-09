@@ -1,6 +1,6 @@
 import React from 'react';
 import InputError from '@/Components/InputError';
-import { Head, Link, useForm } from '@inertiajs/inertia-react';
+import { useForm } from '@inertiajs/inertia-react';
 import ReactQuill from 'react-quill';
 import DatePicker from "react-datepicker";
 import PrimaryButton from '@/Components/PrimaryButton';
@@ -13,7 +13,7 @@ import Button from 'react-bootstrap/Button';
 
 
 
-export default function ProjectSettings({ project, users, }) {
+export default function ProjectSettings({ project, users, onUserAdded, onUserDeleted}) {
 
 
     const [addUserModal, setAddUserModal] = useState(false);
@@ -34,18 +34,6 @@ export default function ProjectSettings({ project, users, }) {
 
         put(`/projects/${project.id}`);
     };
-    const searchForUsers = (e) => {
-        console.log(e);
-        axios.post('/users/searchUsers',
-            { searchEmail: e.target.value })
-            .then((response) => {
-                console.log(response.data)
-                setProjectUsers(response.data.map((user) => ({ 'value': user.id, 'label': user.email })));
-            }, (error) => {
-                return (error);
-            });
-    }
-
     return (
         <section className="text-gray-600 body-font relative">
             <button onClick={() => setAddUserModal(true)} className="btn btn-success btn-sm ms-3">Add a User</button>
@@ -95,7 +83,7 @@ export default function ProjectSettings({ project, users, }) {
                     <Modal.Title>Add a User</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                    <AddUser users={users} project={project}></AddUser>
+                    <AddUser users={users} project={project} onUserAdded={onUserAdded} onUserDeleted={onUserDeleted}></AddUser>
                 </Modal.Body>
                 <Modal.Footer>
                     <Button variant="secondary" onClick={() => (setAddUserModal(false))}>

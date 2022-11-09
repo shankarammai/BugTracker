@@ -1,12 +1,9 @@
 import alertify from 'alertifyjs';
 import 'alertifyjs/build/css/alertify.css';
 import React, { useState, useRef } from 'react'
-import Spinner from 'react-bootstrap/Spinner';
 
 
-export default function AddUser({ onUserAddClick, data, setUserModal,project,users }) {
-    const [newUsers, setNewUsers] = useState([]);
-    const [loading, setLoading] = useState(false);
+export default function AddUser({ project,users,onUserAdded,onUserDeleted}) {
     const [searchedUsers, setSearchedUsers] = useState(null);
     const searchEmailValue = useRef();
     const userIds = users.map((user) => user.id);
@@ -28,6 +25,7 @@ export default function AddUser({ onUserAddClick, data, setUserModal,project,use
             { userId, role, projectId:project.id })
             .then((response) => {
                 console.log(response.data);
+                onUserAdded(response.data.user);
                 (response.data.success) ? alertify.success('User Successfully Added') : alertify.error(response.data.message)
             }, (error) => {
                 console.log(error);
@@ -39,6 +37,7 @@ export default function AddUser({ onUserAddClick, data, setUserModal,project,use
         axios.delete(`/projects/${project.id}/projectUsers/${userId}`)
             .then((response) => {
                 console.log(response.data);
+                onUserDeleted(userId);
                 (response.data.success) ? alertify.success('User Successfully Removed') : alertify.error(response.data.message)
             }, (error) => {
                 console.log(error);
