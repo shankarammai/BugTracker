@@ -29,6 +29,10 @@ export default function ViewTask(props) {
     const [comments, setComments] = useState(props.task.comments);
 
     const addComment = () => {
+        if (newComment.current.value == '') { 
+            alertify.alert('Warning', 'Comment cannot be empty!', function(){ alertify.success('Ok'); });
+            return;
+        }
         axios.post(`/projects/${props.project.id}/tasks/${props.task.id}/comments/`,
             { 'content': newComment.current.value })
             .then((response) => {

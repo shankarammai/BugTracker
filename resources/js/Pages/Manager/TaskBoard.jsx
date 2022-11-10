@@ -1,9 +1,4 @@
-import React, { useState, useEffect } from 'react'
-import InputError from '@/Components/InputError';
-import { Head, Link, useForm } from '@inertiajs/inertia-react';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
-import PrimaryButton from '@/Components/PrimaryButton';
+import React, { useState, useEffect,useRef } from 'react'
 import 'react-datepicker/dist/react-datepicker.css';
 import Modal from 'react-bootstrap/Modal';
 import CreateTask from './CreateTask';
@@ -24,18 +19,11 @@ export default function TaskBoard({ project, users, auth }) {
 
     const [tasksToDisplay, setTasksToDisplay] = useState([...allTasks]);
     const [showOnlyMineToggle, setShowOnlyMineToggle] = useState(false);
+    const searchRef = useRef(null);
 
 
     useEffect(() => {
-        if (showOnlyMineToggle) {
-            setTasksToDisplay((prev) =>
-                prev.filter((task) => {
-                    return task.assigned_to.includes(auth.user.id);
-                }));
-        }
-        else {
-            setTasksToDisplay((prev) => [...allTasks]);
-        }
+        handelShowTasks();
     }, [allTasks, showOnlyMineToggle])
 
 
@@ -139,6 +127,18 @@ export default function TaskBoard({ project, users, auth }) {
         setOpenedTask(data);
     }
 
+    const handelShowTasks = () => {
+        if (searchRef.current.value!='' && showOnlyMineToggle) {
+            setTasksToDisplay(allTasks.filter(task => task.title.includes(searchRef.current.value) && task.assigned_to==auth.user.id));
+        }
+        if (searchRef.current.value=='' && showOnlyMineToggle) { 
+            setTasksToDisplay(allTasks.filter(task => task.assigned_to==auth.user.id));
+        }
+        if (!showOnlyMineToggle) {
+            setTasksToDisplay(allTasks.filter(task => task.title.includes(searchRef.current.value)));
+        }
+    }
+
     return (
         <div className="container-fluid">
             <div className="row">
@@ -148,12 +148,12 @@ export default function TaskBoard({ project, users, auth }) {
                     </h4>
                 </div>
                 <div className="col-sm">
-                    <button onClick={showAssignedToMe} className={showOnlyMineToggle ? 'btn btn-secondary' : 'btn btn-light'}> Assigned to me</button> | recently added
+                    <button onClick={showAssignedToMe} className={showOnlyMineToggle ? 'btn btn-secondary' : 'btn btn-light'}> Assigned to me</button>
 
                 </div>
                 <div className="col-sm">
                     <div className="input-group">
-                        <input type="text" className="form-control dropdown-toggle" placeholder="Search Task..." id="top-search" />
+                        <input onChange={handelShowTasks} ref={searchRef}type="text" className="form-control dropdown-toggle" placeholder="Search Task..." id="top-search" />
                     </div>
                 </div>
             </div>
