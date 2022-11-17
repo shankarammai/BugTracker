@@ -20,7 +20,8 @@ class Tasks extends Controller
     public function index($projectId)
     {
         // 
-        return Inertia::render('Manager/Tasks', ['projectId' => $projectId]);
+        abort(404);
+        // return Inertia::render('Manager/Tasks', ['projectId' => $projectId]);
     }
 
     /**
@@ -31,7 +32,8 @@ class Tasks extends Controller
     public function create($project_id)
     {
         //
-        return Inertia::render('Manager/CreateTask', ['projectId' => $project_id]);
+        abort(404);
+        // return Inertia::render('Manager/CreateTask', ['projectId' => $project_id]);
     }
 
     /**
@@ -78,10 +80,7 @@ class Tasks extends Controller
      */
     public function show($projectId, Task $task)
     {
-        $assignedTo = $task->assignedUsers();
-        $project = Project::where('id', $projectId)->first();
-        $comments = Comments::with('user:id,name,role,email')->where('task_id', $task->id)->get();
-        return Inertia::render('Manager/ViewTask', compact('task', 'assignedTo', 'comments', 'project'));
+        abort(404);
     }
 
     /**
@@ -93,6 +92,7 @@ class Tasks extends Controller
     public function edit($id)
     {
         //
+        abort(404);
     }
 
     /**

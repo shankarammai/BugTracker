@@ -18,6 +18,7 @@ class CommentsController extends Controller
     public function index()
     {
         //
+        abort(404);
     }
 
     /**
@@ -28,6 +29,7 @@ class CommentsController extends Controller
     public function create()
     {
         //
+        abort(404);
     }
 
     /**
@@ -64,6 +66,7 @@ class CommentsController extends Controller
     public function show(Comments $comments)
     {
         //
+        abort(404);
     }
 
     /**
@@ -75,6 +78,7 @@ class CommentsController extends Controller
     public function edit(Comments $comments)
     {
         //
+        abort(404);
     }
 
     /**
@@ -87,6 +91,7 @@ class CommentsController extends Controller
     public function update(Request $request, Comments $comments)
     {
         //
+        abort(404);
     }
 
     /**

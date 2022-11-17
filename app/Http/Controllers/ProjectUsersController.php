@@ -21,6 +21,7 @@ class ProjectUsersController extends Controller
     public function index()
     {
         //
+        abort(404);
     }
 
     /**
@@ -31,6 +32,7 @@ class ProjectUsersController extends Controller
     public function create()
     {
         //
+        abort(404);
     }
 
     /**
@@ -81,6 +83,7 @@ class ProjectUsersController extends Controller
     public function show(ProjectUsers $projectusers)
     {
         //
+        abort(404);
     }
 
     /**
@@ -92,6 +95,7 @@ class ProjectUsersController extends Controller
     public function edit(ProjectUsers $projectusers)
     {
         //
+        abort(404);
     }
 
     /**
@@ -104,6 +108,7 @@ class ProjectUsersController extends Controller
     public function update(Request $request, ProjectUsers $projectusers)
     {
         //
+        abort(404);
     }
 
     /**

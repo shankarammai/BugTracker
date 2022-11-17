@@ -25,8 +25,11 @@ class Projects extends Controller
             $projects = Project::where('creator', $user->id)->get();
             return Inertia::render('Manager/Projects', ['projects' => $projects]);
         }
-        $projects = ProjectUsers::with('project')->where("user_id", $user->id)->get(['role', 'user_id', 'project_id']);
-        return Inertia::render('Projects', ['projects' => count($projects) ? $projects : []]);
+        $projectsUsers = ProjectUsers::with('project')->where("user_id", $user->id)->get(['role', 'user_id', 'project_id']);
+        $projects = $projectsUsers->map(function ($project) {
+            return $project->project;
+        });
+        return Inertia::render('Users/Projects', ['projects' => $projects]);
     }
 
     /**
@@ -84,14 +87,13 @@ class Projects extends Controller
         $user = Auth::user();
         $projectUser = ProjectUsers::where('user_id', $user->id)->where('project_id', $id)->first();
 
+        $project = Project::with(['users', 'tasks', 'tasks.comments.user:id,name,role,email'])->findOrFail($id);
         if ($projectUser) {
-            //user is in the project
-
-        }
-
-        $project = Project::with(['users', 'tasks', 'tasks.comments.user:id,name,role,email'])->find($id);
-        if (!$project) {
-            abort(404);
+            $projectUsers = ProjectUsers::with('user:id,name,email',)->where('project_id', $id)->get();
+            $onlyUsersArray = $projectUsers->map(function ($projectUser) {
+                return $projectUser->user;
+            });
+            return Inertia::render('Users/ViewProject', ['project' => $project, 'users' => $onlyUsersArray]);
         }
 
         if ($project->creator == $user->id) {
@@ -114,6 +116,7 @@ class Projects extends Controller
     public function edit($id)
     {
         //
+        abort(404);
     }
 
     /**
@@ -133,14 +136,17 @@ class Projects extends Controller
             'status' => ['required', 'in:Not Started,Started,On Progress,Completed'],
             'description' => ['required', 'string'],
         ]);
-        $projectCreated = $project->update([
-            'title' => $request->post('title'),
-            'budget' => $request->post('budget'),
-            'due_date' => Carbon::parse($request->post('dueDate')),
-            'status' => $request->post('status'),
-            'description' => $request->post('description'),
-        ]);
-        if ($project) {
+
+        if ($project->creator == Auth::user()->id) {
+            $projectCreated = $project->update([
+                'title' => $request->post('title'),
+                'budget' => $request->post('budget'),
+                'due_date' => Carbon::parse($request->post('dueDate')),
+                'status' => $request->post('status'),
+                'description' => $request->post('description'),
+            ]);
+        }
+        if ($projectCreated) {
             return redirect()->route('projects.show', ['project' => $project->id])->with(['success' => true, 'message' => 'Project Successfully Updated']);
         }
         return redirect()->route('projects.show', ['project' => $project->id])->with(['success' => false, 'message' => 'Something Went Wrong']);

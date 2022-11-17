@@ -9,7 +9,7 @@ import 'react-datepicker/dist/react-datepicker.css';
 import 'react-quill/dist/quill.snow.css';
 import Tab from 'react-bootstrap/Tab';
 import Tabs from 'react-bootstrap/Tabs';
-import TaskBoard from './TaskBoard';
+import TaskBoard from '../CommonPages/TaskBoard';
 import ProjectSettings from './ProjectSettings';
 import alertify from 'alertifyjs';
 import 'alertifyjs/build/css/alertify.css';

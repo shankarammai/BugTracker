@@ -8,18 +8,24 @@ use Illuminate\Database\Eloquent\Model;
 
 class Project extends Model
 {
-    use HasFactory,Uuids;
+    use HasFactory, Uuids;
     protected $table = 'projects';
     protected $primaryKey = 'id';
 
     protected $fillable = [
-        'parent_id','creator', 'title','description','budget','due_date','status'
+        'parent_id', 'creator', 'title', 'description', 'budget', 'due_date', 'status'
     ];
-    
-    public function tasks(){
+
+    public function tasks()
+    {
         return $this->hasMany(Task::class, 'project_id');
     }
-    public function users(){
+    public function users()
+    {
         return $this->hasMany(ProjectUsers::class, 'user_id');
+    }
+    public function comments()
+    {
+        return $this->hasManyThrough(Comments::class, Task::class, 'project_id', 'task_id');
     }
 }

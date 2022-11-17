@@ -1,53 +1,39 @@
-import React from 'react'
+import React, { useState } from 'react';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
-import { Head, Link} from '@inertiajs/inertia-react';
+import { Head } from '@inertiajs/inertia-react';
+import 'react-datepicker/dist/react-datepicker.css';
+import 'react-quill/dist/quill.snow.css';
+import Tab from 'react-bootstrap/Tab';
+import Tabs from 'react-bootstrap/Tabs';
+import TaskBoard from '../CommonPages/TaskBoard';
+import ProjectDetails from './ProjectDetails';
+import alertify from 'alertifyjs';
+import 'alertifyjs/build/css/alertify.css';
 
-export default function ViewProject(props) {
-  console.log(props)
-  return (
-    <AuthenticatedLayout
-      auth={props.auth}
-      errors={props.errors}
-      header={<h2 classNameName="font-semibold text-xl text-gray-800 leading-tight">Projects</h2>}
-    >
-      <Head title="Projects" />
+function ViewProject(props) {
+    console.log(props);
+    if (props.flash.success) {
+        alertify.set('notifier', 'position', 'top-right');
+        (props.flash.success) ? alertify.success(props.flash.message) : alertify.error(props.flash.message)
+    }
+    const [users, setUsers] = useState(props.users);
+    return (
+        <AuthenticatedLayout
+            auth={props.auth}
+            errors={props.errors}
+            header={<h2 className="font-semibold text-xl text-gray-800 leading-tight">View Project</h2>}>
 
-
-
-
-      
-      <section class="text-gray-600 body-font bg-white">
-        <div class="container px-5 mx-auto">
-          <div class="flex flex-wrap w-full mb-20 flex-col items-center text-center">
-
-          </div>
-          <div class="flex flex-wrap -m-4">
-            {props.projects && props.projects.map((item, index) => {
-              let project = item.project;
-              return <>
-                <div class="xl:w-1/3 md:w-1/2 p-4">
-                  <div class="border border-gray-200 p-6 rounded-lg">
-                    <div class="mb-2">
-                      <p class="text-sm text-gray-600 flex items-center">{project.status}</p>
-                      <div class="text-gray-900 font-bold text-xl mb-2">{project.title}</div>
-                    </div>
-                    <div class="flex items-center">
-                      <div class="text-sm">
-                        <p class="text-gray-900 leading-none">Budget {project.budget}</p>
-                        <p class="text-gray-600 mb-2"> Due Date {project.due_date}</p>
-                        <Link href={'/projects/' + project.id} class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full">
-                          Read more
-                        </Link>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </>
-            })
-            }
-          </div>
-        </div>
-      </section>
-    </AuthenticatedLayout>
-  )
+            <Head title="Projects" />
+            <Tabs defaultActiveKey="Tasks" id="uncontrolled-tab-example" className="mb-3" >
+                <Tab eventKey="Tasks" title="Tasks">
+                    <TaskBoard project={props.project} users={users} auth={props.auth} />
+                     </Tab>
+                <Tab eventKey="Project" title="Project Details">
+                    <ProjectDetails project={props.project} users={users} />
+                </Tab>
+            </Tabs>
+        </AuthenticatedLayout>
+    )
 }
+
+export default ViewProject
